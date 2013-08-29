@@ -106,11 +106,40 @@ NSString * BBStringByTrimmingTrailingCharactersFromString(NSString *string, NSCh
                     if ([[NSWorkspace sharedWorkspace] type:uti conformsToType:(NSString *)kUTTypeSourceCode]) {
                         [mutableArray addObject:fileNavigableItem];
                     }
+                } else if ([selectedObject isKindOfClass:NSClassFromString(@"IDEGroupNavigableItem")]) {
+
+                    [mutableArray addObjectsFromArray:[BBXcode selectedGroupNavigableItem:selectedObject]];
                 }
             }
         }
     }
     
+    if (mutableArray.count) {
+        return [NSArray arrayWithArray:mutableArray];
+    }
+    return nil;
+}
+
++ (NSArray*) selectedGroupNavigableItem:(IDEGroup*) groupNavigableItem {
+
+    NSMutableArray *mutableArray = [NSMutableArray array];
+
+    for (id child in groupNavigableItem._childItems) {
+
+        if ([child isKindOfClass:NSClassFromString(@"IDEFileReferenceNavigableItem")]) {
+
+            IDEFileNavigableItem *fileNavigableItem = child;
+            NSString *uti = fileNavigableItem.documentType.identifier;
+            if ([[NSWorkspace sharedWorkspace] type:uti conformsToType:(NSString *)kUTTypeSourceCode]) {
+                [mutableArray addObject:fileNavigableItem];
+            }
+
+        } else if ([child isKindOfClass:NSClassFromString(@"IDEGroupNavigableItem")]) {
+
+            [mutableArray addObjectsFromArray:[BBXcode selectedGroupNavigableItem:child]];
+        }
+    }
+
     if (mutableArray.count) {
         return [NSArray arrayWithArray:mutableArray];
     }

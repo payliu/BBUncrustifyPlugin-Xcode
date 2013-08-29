@@ -48,7 +48,7 @@ typedef NS_ENUM (NSUInteger, BBCodeFormattingScheme) {
 @end
 
 @interface IDEGroup : IDEContainerItem
-
+@property (readonly) NSArray *_childItems;
 @end
 
 @interface IDEFileReference : IDEContainerItem
