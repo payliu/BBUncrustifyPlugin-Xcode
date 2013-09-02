@@ -48,7 +48,7 @@ typedef NS_ENUM (NSUInteger, BBCodeFormattingScheme) {
 @end
 
 @interface IDEGroup : IDEContainerItem
-@property (readonly) NSArray *_childItems;
+
 @end
 
 @interface IDEFileReference : IDEContainerItem
@@ -65,8 +65,21 @@ typedef NS_ENUM (NSUInteger, BBCodeFormattingScheme) {
 @property (readonly) NSURL *fileURL;
 @end
 
-@interface IDEStructureNavigator : NSObject
+@interface IDEGroupNavigableItem: IDENavigableItem
+@property (readonly) NSArray *_childItems;
+@end
+
+@interface IDENavigatorOutlineView : NSObject
+- (void)expandItem:(id)arg1 expandChildren:(BOOL)arg2;
+@end
+
+@interface IDEOutlineBasedNavigator : NSObject
+@property(retain) IDENavigatorOutlineView *outlineView;
+@end
+
+@interface IDEStructureNavigator : IDEOutlineBasedNavigator
 @property (retain) NSArray *selectedObjects;
+@property (retain) IDENavigatorOutlineView *outlineView;
 @end
 
 @interface IDENavigableItemCoordinator : NSObject
@@ -130,4 +143,5 @@ typedef NS_ENUM (NSUInteger, BBCodeFormattingScheme) {
 + (NSArray *)selectedSourceCodeFileNavigableItems;
 + (BOOL)uncrustifyCodeOfDocument:(IDESourceCodeDocument *)document inWorkspace:(IDEWorkspace *)workspace;
 + (BOOL)uncrustifyCodeAtRanges:(NSArray *)ranges document:(IDESourceCodeDocument *)document inWorkspace:(IDEWorkspace *)workspace;
++ (IDEStructureNavigator*) expandGroupNavigableItem;
 @end

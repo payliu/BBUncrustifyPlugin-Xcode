@@ -88,41 +88,73 @@ NSString * BBStringByTrimmingTrailingCharactersFromString(NSString *string, NSCh
     return nil;
 }
 
-+ (NSArray *)selectedSourceCodeFileNavigableItems {
-    NSMutableArray *mutableArray = [NSMutableArray array];
++ (IDEStructureNavigator *) getIDEStructureNavigator
+{
     id currentWindowController = [[NSApp keyWindow] windowController];
+
     if ([currentWindowController isKindOfClass:NSClassFromString(@"IDEWorkspaceWindowController")]) {
+
         IDEWorkspaceWindowController *workspaceController = currentWindowController;
         IDEWorkspaceTabController *workspaceTabController = [workspaceController activeWorkspaceTabController];
         IDENavigatorArea *navigatorArea = [workspaceTabController navigatorArea];
         id currentNavigator = [navigatorArea currentNavigator];
-        
-        if ([currentNavigator isKindOfClass:NSClassFromString(@"IDEStructureNavigator")]) {
-            IDEStructureNavigator *structureNavigator = currentNavigator;
-            for (id selectedObject in structureNavigator.selectedObjects) {
-                if ([selectedObject isKindOfClass:NSClassFromString(@"IDEFileNavigableItem")]) {
-                    IDEFileNavigableItem *fileNavigableItem = selectedObject;
-                    NSString *uti = fileNavigableItem.documentType.identifier;
-                    if ([[NSWorkspace sharedWorkspace] type:uti conformsToType:(NSString *)kUTTypeSourceCode]) {
-                        [mutableArray addObject:fileNavigableItem];
-                    }
-                } else if ([selectedObject isKindOfClass:NSClassFromString(@"IDEGroupNavigableItem")]) {
 
-                    [mutableArray addObjectsFromArray:[BBXcode selectedGroupNavigableItem:selectedObject]];
-                }
-            }
+        if ([currentNavigator isKindOfClass:NSClassFromString(@"IDEStructureNavigator")]) {
+
+            return currentNavigator;
         }
     }
     
-    if (mutableArray.count) {
-        return [NSArray arrayWithArray:mutableArray];
-    }
     return nil;
 }
 
-+ (NSArray*) selectedGroupNavigableItem:(IDEGroup*) groupNavigableItem {
++ (IDEStructureNavigator *) expandGroupNavigableItem
+{
+    IDEStructureNavigator *structureNavigator = [BBXcode getIDEStructureNavigator];
+
+    for (id item in structureNavigator.selectedObjects) {
+
+        if ([item isKindOfClass:NSClassFromString(@"IDEGroupNavigableItem")]) {
+
+            [structureNavigator.outlineView expandItem:item expandChildren:YES];
+        }
+    }
+    
+    return structureNavigator;
+}
+
++ (NSArray *) selectedSourceCodeFileNavigableItems
+{
+    NSMutableArray *mutableArray = [NSMutableArray array];
+
+    IDEStructureNavigator *structureNavigator = [BBXcode expandGroupNavigableItem];
+
+    for (id selectedObject in structureNavigator.selectedObjects) {
+        if ([selectedObject isKindOfClass:NSClassFromString(@"IDEFileNavigableItem")]) {
+            IDEFileNavigableItem *fileNavigableItem = selectedObject;
+            NSString *uti = fileNavigableItem.documentType.identifier;
+
+            if ([[NSWorkspace sharedWorkspace] type:uti conformsToType:(NSString *)kUTTypeSourceCode]) {
+                [mutableArray addObject:fileNavigableItem];
+            }
+        } else if ([selectedObject isKindOfClass:NSClassFromString(@"IDEGroupNavigableItem")]) {
+
+            [mutableArray addObjectsFromArray:[BBXcode selectedGroupNavigableItem:selectedObject]];
+        }
+    }
+
+    if (mutableArray.count) {
+        return [NSArray arrayWithArray:mutableArray];
+    }
+
+    return nil;
+}
+
++ (NSArray*) selectedGroupNavigableItem:(IDEGroupNavigableItem*) groupNavigableItem {
 
     NSMutableArray *mutableArray = [NSMutableArray array];
+
+    NSLog(@"groupNavigableItem._childItems:%@", groupNavigableItem._childItems);
 
     for (id child in groupNavigableItem._childItems) {
 

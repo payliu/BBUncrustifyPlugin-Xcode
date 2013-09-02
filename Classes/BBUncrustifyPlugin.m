@@ -160,7 +160,7 @@ static BBUncrustifyPlugin *sharedPlugin = nil;
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     if ([menuItem action] == @selector(uncrustifySelectedFiles:)) {
-        return ([BBXcode selectedSourceCodeFileNavigableItems].count > 0);
+        return YES;
     } else if ([menuItem action] == @selector(uncrustifyActiveFile:)) {
         IDESourceCodeDocument *document = [BBXcode currentSourceCodeDocument];
         return (document != nil);
